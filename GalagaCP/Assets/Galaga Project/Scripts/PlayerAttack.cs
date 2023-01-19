@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// 플레이어 총알 스포너
 public class PlayerAttack : MonoBehaviour
 {
     private ObjectPool Pool;
@@ -40,7 +41,7 @@ public class PlayerAttack : MonoBehaviour
         
         if(timeAfterAttack >= attackRate)
         {
-            GameObject newBullet = Pool.SpawnPBullet();
+            GameObject newBullet = Pool.spawnHandle(1);
             if(newBullet == null || newBullet == default)
             {
                 return;

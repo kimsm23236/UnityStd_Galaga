@@ -6,6 +6,11 @@ public class Seat : MonoBehaviour
 {
     private bool isTake;
     private GameObject SeatedEnemy;
+
+    public GameObject SeatEnemy
+    {
+        get { return SeatedEnemy; }
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -17,6 +22,7 @@ public class Seat : MonoBehaviour
     {
         
     }
+
 
     public void Taked(GameObject takedObj)
     {
