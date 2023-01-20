@@ -6,10 +6,12 @@ public class MovePoint : MonoBehaviour
 {
     public MovePoint next = default;
     public bool isAttackPoint;
+    public bool isRandomBehavior;
     // Start is called before the first frame update
     void Start()
     {
-        isAttackPoint = false;
+        // isAttackPoint = false;
+        // isRandomBehavior = false;
     }
 
     // Update is called once per frame
@@ -29,6 +31,15 @@ public class MovePoint : MonoBehaviour
         {
             // 적이 공격을 할 위치일 경우 * 적 공격 함수 추가
             
+        }
+        if(isRandomBehavior)
+        {
+            EnemyMovement emc = other.gameObject.GetComponent<EnemyMovement>();
+            if(emc != null && emc != default)
+            {
+                if(emc.CurrentMovePoint == this)
+                    emc.SetRandomBehavior();
+            }
         }
 
         Debug.Log($"{gameObject.name} 도착");

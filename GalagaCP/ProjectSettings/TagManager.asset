@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - InitWall
+  - ChangeDirection
   layers:
   - Default
   - TransparentFX

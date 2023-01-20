@@ -13,9 +13,11 @@ public class EnemyMovement : MonoBehaviour
 {
     private CharacterController controller;
     public MovementType defaultMovementType;
-    private MovementType movementType;
+    public MovementType movementType;
 
     private GameObject target;
+
+    public Transform prevParent;
 
     // 플레이어 추적 관련 멤버 * 다른 타입에서도 재사용가능
     private bool isTrace;
@@ -32,7 +34,9 @@ public class EnemyMovement : MonoBehaviour
     }
     // 대열 합류 관련 멤버
     private bool isSeated;
-    private Seat ownSeat;
+    public Seat ownSeat;
+
+    public EnemyArray enemyArray;
 
     // 스폰 관련 멤버
     public delegate void SpawnedHandle(Transform startTransform, MoveTrail newTrail);
@@ -47,6 +51,8 @@ public class EnemyMovement : MonoBehaviour
         controller = gameObject.GetComponent<CharacterController>();
         target = Tools.GetRootObj("PlayerSpaceShip");
         movementType = defaultMovementType;  
+        GameObject eag = Tools.GetRootObj("EnemyArray1");
+        enemyArray = eag.GetComponent<EnemyArray>();
 
         if(ownTrail != null && ownTrail != default)
         {
@@ -71,6 +77,7 @@ public class EnemyMovement : MonoBehaviour
                 MovePrc_AlongTrail();
                 break;
             case MovementType.SEATED:
+                MovePrc_Seated();
                 break;
         }
     }
@@ -99,6 +106,22 @@ public class EnemyMovement : MonoBehaviour
 
     }
 
+    private void MovePrc_Seated()
+    {
+        if(ownSeat == null || ownSeat == default)
+            return;
+        
+        if(ownSeat.Taked)
+            return;
+
+        Transform targetTransform = ownSeat.transform;
+        Vector3 dir = targetTransform.position - transform.position;
+
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir) , Time.deltaTime * rotateSpeed);
+        transform.position = Vector3.MoveTowards(transform.position, targetTransform.position, Time.deltaTime * traceSpeed);
+
+    }
+
     void OnTriggerEnter(Collider other)
     {
         if(other.tag == "InitWall")
@@ -113,23 +136,47 @@ public class EnemyMovement : MonoBehaviour
 
     }
 
+    public void SetParent(Transform newParent)
+    {
+        prevParent = transform.parent;
+        transform.parent = newParent;
+    }
+    public void SetPrevParent()
+    {
+        transform.parent = prevParent;
+    }
+
     public void SetRandomBehavior()
     {
-        int randNum = Random.Range(1, 3+1);
-
-        switch(randNum)
+        int randNum = default;
+        if(enemyArray.IsThereEmptySeat())
         {
-            case 1:
-            movementType = MovementType.PLAYERTRACE;
-            break;
-            case 2:
-            movementType = MovementType.ALONGTRAIL;
-            break;
-            case 3:
-            movementType = MovementType.SEATED;
-            break;
+            randNum = Random.Range(1, 100+1);
+        }
+        else
+        {
+            randNum = Random.Range(21, 100+1);
         }
 
+        if(randNum > 40)
+        movementType = MovementType.ALONGTRAIL;
+        else if (randNum > 20)
+        movementType = MovementType.ALONGTRAIL; // 플레이어 추적 구현시 바꿈
+        else
+        {
+            movementType = MovementType.SEATED;
+            // 자리 배치 작업
+            // 임시로 대열 하나만 해봄
+            // 이후 대열 늘어나면 관리자를 통해 배치 작업 하는 것으로 바꿀 예정
+            ownSeat = enemyArray.ReqEmptySeat();
+            ownSeat.enemyAssignHandle(gameObject);
+        }
+
+    }
+
+    public void SetMovementType(MovementType newMovementType)
+    {
+        movementType = newMovementType;
     }
 
 
@@ -140,6 +187,12 @@ public class EnemyMovement : MonoBehaviour
             return;
         }
         currentTargetMovePoint = nextMovePoint;
+    }
+
+    public void SetMoveTrail(MoveTrail newMoveTrail)
+    {
+        ownTrail = newMoveTrail;
+        currentTargetMovePoint = ownTrail.root;
     }
 
     private void OnSpawn(Transform startTransform, MoveTrail newTrail)

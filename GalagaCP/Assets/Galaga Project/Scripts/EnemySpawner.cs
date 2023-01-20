@@ -31,9 +31,10 @@ public class EnemySpawner : MonoBehaviour
         Pool = op.GetComponent<ObjectPool>();
 
         spawnCount = 0;
-        spawnRate = 0.2f;
+        spawnRate = 0.3f;
         isAbleSpawn = true;
-        waveRate = 1f;
+
+        waveRate = Random.Range(5f, 10f);
         CPW = 6;
         isAbleWave = true;
     }
